@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GMR Institute of Technology</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background-color: #004c8c;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .chatbot-icon {
+            width: 80px;
+            height: 80px;
+            background-color: #004c8c;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 80px;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            cursor: pointer;
+        }
+
+        .chat-container {
+            display: none;
+            position: fixed;
+            bottom: 120px;
+            right: 40px;
+            width: 300px;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .chat-messages {
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+        }
+
+        .user-input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            border: none;
+            border-top: 1px solid #ccc;
+            outline: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>Welcome to GMR Institute of Technology</h1>
+        <p>Where Innovation Meets Excellence</p>
+    </div>
+
+    <div class="container">
+        <h2>About GMRIT</h2>
+        <p>GMR Institute of Technology (GMRIT) is a premier engineering institution located in Andhra Pradesh, India. It
+            offers undergraduate and postgraduate programs in various engineering disciplines.</p>
+        <p>For more information, visit our <a href="https://www.gmrit.org/" target="_blank">website</a>.</p>
+    </div>
+    <div class="chatbot-icon" id="chatbot-icon" onclick="toggleChat()"><img src="chatbot_icon.png" alt="Chatbot"></div>
+    <div class="chat-container" id="chat-container">
+        <div class="chat-messages" id="chat-messages"></div>
+        <input type="text" class="user-input" id="user-input" name="msg" placeholder="Type your message...">
+        <!-- <button onclick="sendMessage()">Send</button> -->
+    </div>
+
+    <script>
+        const chatBox = document.getElementById('chat-messages');
+        const userInput = document.getElementById('user-input');
+        const chatIcon = document.getElementById('chatbot-icon');
+        const chatContainer = document.getElementById('chat-container');
+
+        function toggleChat() {
+            if (chatContainer.style.display === 'none') {
+                chatContainer.style.display = 'block';
+            } else {
+                chatContainer.style.display = 'none';
+            }
+        }
+
+
+        function appendMessage(message, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add(sender);
+            messageDiv.innerText = message;
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function sendMessage() {
+            const userMessage = userInput.value.trim();
+            if (userMessage !== '') {
+                if (userMessage.toLowerCase() === 'quit') {
+                    chatContainer.style.display = "none";
+                    return;
+                }
+                appendMessage(`You: ${userMessage}`, 'user');
+                userInput.value = '';
+                fetch('/get_response', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message: userMessage })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        appendMessage(`Bot: ${data.response}`, 'bot');
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+            }
+        }
+        userInput.addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+
+</html>
